@@ -538,7 +538,7 @@ cargo-ac/
 
 ### タスク
 
-* [ ] Rust workspaceを作成する
+* [x] Rust workspaceを作成する
 * [ ] `cargo-ac` CLI crateを作成する
 * [ ] `ac-core` library crateを作成する
 * [ ] `clap` を導入する
