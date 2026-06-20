@@ -18,34 +18,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check whether Cargo.toml exists
-        id: cargo
+      - name: Check whether Rust crates exist
+        id: crates
         shell: bash
         run: |
-          if [ -f Cargo.toml ]; then
+          if compgen -G "crates/*/Cargo.toml" > /dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install Rust toolchain
-        if: steps.cargo.outputs.exists == 'true'
+        if: steps.crates.outputs.exists == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
 
       - name: cargo fmt
-        if: steps.cargo.outputs.exists == 'true'
+        if: steps.crates.outputs.exists == 'true'
         run: cargo fmt --all -- --check
 
       - name: cargo clippy
-        if: steps.cargo.outputs.exists == 'true'
+        if: steps.crates.outputs.exists == 'true'
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: cargo test
-        if: steps.cargo.outputs.exists == 'true'
+        if: steps.crates.outputs.exists == 'true'
         run: cargo test --all
 
       - name: Skip Rust checks
-        if: steps.cargo.outputs.exists != 'true'
-        run: echo "Cargo.toml does not exist yet. Skipping Rust checks."
+        if: steps.crates.outputs.exists != 'true'
+        run: echo "No Rust crates exist yet. Skipping cargo fmt, clippy, and test."
