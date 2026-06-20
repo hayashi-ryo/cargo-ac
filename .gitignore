@@ -82,3 +82,4 @@ atcoder-debug-html/
 .env.*
 !.env.example
 .github/initial-issues/*
+.codex/*
