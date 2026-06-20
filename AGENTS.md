@@ -420,6 +420,22 @@ Issue対応時は、以下の順番で進めてください。
 * parser処理とHTTP処理の密結合
 * CLI依存を `ac-core` に入れること
 
+## Codex-ready Issueの条件
+
+Codexに依頼するIssueは、以下の条件を満たしている必要があります。
+
+* Summaryが明確である
+* Scopeが明確である
+* Requirementsが箇条書きで整理されている
+* Acceptance criteriaがチェックボックス形式で書かれている
+* Non-goalsが明記されている
+* 対象crateまたは対象ファイルの見当がついている
+* 依存するIssueがある場合は明記されている
+* `agent: codex-ready` ラベルが付いている
+* 認証、Cookie、提出、AtCoderアクセスを含む場合は `agent: needs-review-carefully` も付ける
+
+Codex-readyではないIssueには、`agent: needs-human-design` を付けます。
+
 ## ライセンス
 
 このプロジェクトは `MIT OR Apache-2.0` のデュアルライセンスです。

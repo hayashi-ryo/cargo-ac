@@ -452,42 +452,42 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 * [x] `AGENTS.md` にBranch命名規則を書く
 * [x] `AGENTS.md` にCommit message規則を書く
 * [x] `AGENTS.md` にPR作成ルールを書く
-* [ ] `main` ブランチを保護する
-* [ ] Pull Request経由のmergeを必須にする
-* [ ] status checks成功を必須にする
-* [ ] force pushを禁止する
-* [ ] `.github/ISSUE_TEMPLATE/` ディレクトリを作成する
-* [ ] `.github/ISSUE_TEMPLATE/feature.yml` を作成する
-* [ ] bug用Issue templateを作成する
-* [ ] `.github/pull_request_template.md` を作成する
-* [ ] `.github/workflows/ci.yml` を作成する
-* [ ] Rust toolchainを設定する
-* [ ] CIで `cargo fmt --all -- --check` を実行する
-* [ ] CIで `cargo clippy --all-targets --all-features -- -D warnings` を実行する
-* [ ] CIで `cargo test --all` を実行する
-* [ ] GitHub labelsを作成する
-* [ ] GitHub milestonesを作成する
-* [ ] GitHub Projectsを作成する
-* [ ] Project statusを作成する
-* [ ] Ready条件を定義する
-* [ ] Phase 3以降の初期Issueを作成する
-* [ ] Codexに依頼できるIssueに `agent: codex-ready` を付ける
+* [x] `main` ブランチを保護する
+* [x] Pull Request経由のmergeを必須にする
+* [x] status checks成功を必須にする
+* [x] force pushを禁止する
+* [x] `.github/ISSUE_TEMPLATE/` ディレクトリを作成する
+* [x] `.github/ISSUE_TEMPLATE/feature.yml` を作成する
+* [x] bug用Issue templateを作成する
+* [x] `.github/pull_request_template.md` を作成する
+* [x] `.github/workflows/ci.yml` を作成する
+* [x] Rust toolchainを設定する
+* [x] CIで `cargo fmt --all -- --check` を実行する
+* [x] CIで `cargo clippy --all-targets --all-features -- -D warnings` を実行する
+* [x] CIで `cargo test --all` を実行する
+* [x] GitHub labelsを作成する
+* [x] GitHub milestonesを作成する
+* [x] GitHub Projectsを作成する
+* [x] Project statusを作成する
+* [x] Ready条件を定義する
+* [x] Phase 3以降の初期Issueを作成する
+* [x] Codexに依頼できるIssueに `agent: codex-ready` を付ける
 
 ### Phase 2 完了条件
 
-* [ ] `AGENTS.md` にCodex向け作業指示が書かれている
-* [ ] `AGENTS.md` にBranch命名規則が書かれている
-* [ ] `AGENTS.md` にCommit message規則が書かれている
-* [ ] `AGENTS.md` にPR作成ルールが書かれている
-* [ ] Issue templateが作成されている
-* [ ] PR templateが作成されている
-* [ ] CIが作成されている
-* [ ] labelsが整理されている
-* [ ] milestonesが作成されている
-* [ ] Project boardが作成されている
-* [ ] Branch protectionが設定されている
-* [ ] Phase 3以降の初期Issueが登録されている
-* [ ] Codexに依頼可能なIssueが1つ以上Readyになっている
+* [x] `AGENTS.md` にCodex向け作業指示が書かれている
+* [x] `AGENTS.md` にBranch命名規則が書かれている
+* [x] `AGENTS.md` にCommit message規則が書かれている
+* [x] `AGENTS.md` にPR作成ルールが書かれている
+* [x] Issue templateが作成されている
+* [x] PR templateが作成されている
+* [x] CIが作成されている
+* [x] labelsが整理されている
+* [x] milestonesが作成されている
+* [x] Project boardが作成されている
+* [x] Branch protectionが設定されている
+* [x] Phase 3以降の初期Issueが登録されている
+* [x] Codexに依頼可能なIssueが1つ以上Readyになっている
 
 ## Phase 3: CLI骨格作成
 
