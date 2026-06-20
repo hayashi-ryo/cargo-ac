@@ -1,0 +1,88 @@
+name: Bug report
+description: 不具合報告
+title: "fix: "
+labels:
+
+* "type: bug"
+  body:
+
+* type: markdown
+  attributes:
+  value: |
+  ## Bug report
+
+  ```
+  不具合の内容、再現手順、期待結果、実際の結果を記載してください。
+  ```
+
+* type: textarea
+  id: summary
+  attributes:
+  label: Summary
+  description: 不具合の概要を書いてください。
+  placeholder: 例）`cargo ac test a` 実行時に `.out` ファイルが存在しないとpanicする。
+  validations:
+  required: true
+
+* type: textarea
+  id: steps
+  attributes:
+  label: Steps to reproduce
+  description: 再現手順を書いてください。
+  placeholder: |
+  1. `cargo ac new abc400` を実行する
+  2. `testcases/a/sample-1.in` だけを作成する
+  3. `cargo ac test a` を実行する
+  validations:
+  required: true
+
+* type: textarea
+  id: expected
+  attributes:
+  label: Expected behavior
+  description: 期待する動作を書いてください。
+  placeholder: `.out` が存在しないことをエラーとして表示する。
+  validations:
+  required: true
+
+* type: textarea
+  id: actual
+  attributes:
+  label: Actual behavior
+  description: 実際の動作を書いてください。
+  placeholder: panicして終了する。
+  validations:
+  required: true
+
+* type: textarea
+  id: environment
+  attributes:
+  label: Environment
+  description: 実行環境を書いてください。
+  placeholder: |
+  - OS:
+  - Rust version:
+  - cargo-ac version:
+  validations:
+  required: false
+
+* type: textarea
+  id: logs
+  attributes:
+  label: Logs
+  description: ログやエラー出力があれば貼ってください。認証情報、Cookie、CSRF tokenは含めないでください。
+  render: text
+  validations:
+  required: false
+
+* type: textarea
+  id: acceptance_criteria
+  attributes:
+  label: Acceptance criteria
+  description: 修正完了条件を書いてください。
+  placeholder: |
+  - [ ] panicしない
+  - [ ] ユーザーに分かるエラーメッセージを表示する
+  - [ ] regression testを追加する
+  validations:
+  required: true

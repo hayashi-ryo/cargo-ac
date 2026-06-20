@@ -253,31 +253,31 @@ debug-html/
 * [x] リポジトリ説明文を設定する
 * [x] Topicsを設定する
 * [x] README.mdを作成する
-* [ ] LICENSEを追加する
+* [x] LICENSEを追加する
 * [x] .gitignoreを追加する
 * [x] docsディレクトリを作成する
-* [ ] docs/tasks.mdを追加する
-* [ ] docs/ROADMAP.mdを追加する
-* [ ] docs/ARCHITECTURE.mdを追加する
+* [x] docs/tasks.mdを追加する
+* [x] docs/ROADMAP.mdを追加する
+* [x] docs/ARCHITECTURE.mdを追加する
 * [x] プロジェクトの目的をREADMEに書く
 * [x] 想定コマンドをREADMEに書く
 * [x] 初期MVPをREADMEに書く
 * [x] 初期段階でやらないことをREADMEに書く
-* [ ] `LICENSE-MIT` を追加する
-* [ ] `LICENSE-APACHE` を追加する
+* [x] `LICENSE-MIT` を追加する
+* [x] `LICENSE-APACHE` を追加する
 * [x] READMEに `MIT OR Apache-2.0` と明記する
 * [ ] `Cargo.toml` の `license` に `MIT OR Apache-2.0` を設定する
 
 ### Phase 1 完了条件
 
-* [ ] GitHub上に開発用リポジトリが存在する
-* [ ] READMEにプロジェクトの目的と方針が書かれている
-* [ ] LICENSEが存在する
-* [ ] .gitignoreが存在する
-* [ ] docs/tasks.mdが存在する
-* [ ] docs/ROADMAP.mdが存在する
-* [ ] docs/ARCHITECTURE.mdが存在する
-* [ ] Phase 2でCodex運用整備に進める状態になっている
+* [x] GitHub上に開発用リポジトリが存在する
+* [x] READMEにプロジェクトの目的と方針が書かれている
+* [x] LICENSEが存在する
+* [x] .gitignoreが存在する
+* [x] docs/tasks.mdが存在する
+* [x] docs/ROADMAP.mdが存在する
+* [x] docs/ARCHITECTURE.mdが存在する
+* [x] Phase 2でCodex運用整備に進める状態になっている
 
 ## Phase 2: Codex前提のGitHub運用整備
 
@@ -441,75 +441,44 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 
 ### タスク
 
-* [ ] リポジトリルートに `CODEX.md` を作成する
-* [ ] `docs/CONTRIBUTING.md` を作成する
-* [ ] `docs/BRANCHING.md` を作成する
-* [ ] CODEX.mdにCodex向けの恒常的な作業指示を書く
-* [ ] CODEX.mdにcrate境界を書く
-* [ ] CODEX.mdにエラーハンドリング方針を書く
-* [ ] CODEX.mdにAtCoder連携時の注意点を書く
-* [ ] CODEX.mdにセキュリティ上の禁止事項を書く
-* [ ] CODEX.mdにテスト実行方針を書く
-* [ ] Branch命名規則を定義する
-* [ ] Commit message規則を定義する
-* [ ] Squash merge方針を定義する
+* [x] リポジトリルートに `AGENTS.md` を作成する
+* [x] `AGENTS.md` にCodex向けの恒常的な作業指示を書く
+* [x] `AGENTS.md` にプロジェクトの目的を書く
+* [x] `AGENTS.md` にcrate境界を書く
+* [x] `AGENTS.md` にエラーハンドリング方針を書く
+* [x] `AGENTS.md` にAtCoder連携時の注意点を書く
+* [x] `AGENTS.md` にセキュリティ上の禁止事項を書く
+* [x] `AGENTS.md` にテスト実行方針を書く
+* [x] `AGENTS.md` にBranch命名規則を書く
+* [x] `AGENTS.md` にCommit message規則を書く
+* [x] `AGENTS.md` にPR作成ルールを書く
 * [ ] `main` ブランチを保護する
 * [ ] Pull Request経由のmergeを必須にする
 * [ ] status checks成功を必須にする
-* [ ] branchの最新化を必須にする
 * [ ] force pushを禁止する
-* [ ] branch deletionを禁止する
 * [ ] `.github/ISSUE_TEMPLATE/` ディレクトリを作成する
 * [ ] `.github/ISSUE_TEMPLATE/feature.yml` を作成する
 * [ ] bug用Issue templateを作成する
-* [ ] Issue templateにSummary欄を追加する
-* [ ] Issue templateにScope欄を追加する
-* [ ] Issue templateにRequirements欄を追加する
-* [ ] Issue templateにAcceptance criteria欄を追加する
-* [ ] Issue templateにNon-goals欄を追加する
-* [ ] Issue templateにNotes for Codex欄を追加する
 * [ ] `.github/pull_request_template.md` を作成する
-* [ ] PR templateにSummary欄を追加する
-* [ ] PR templateにRelated issue欄を追加する
-* [ ] PR templateにChanges欄を追加する
-* [ ] PR templateにVerification欄を追加する
-* [ ] PR templateにScope control欄を追加する
-* [ ] PR templateにNotes for reviewer欄を追加する
 * [ ] `.github/workflows/ci.yml` を作成する
 * [ ] Rust toolchainを設定する
 * [ ] CIで `cargo fmt --all -- --check` を実行する
 * [ ] CIで `cargo clippy --all-targets --all-features -- -D warnings` を実行する
 * [ ] CIで `cargo test --all` を実行する
-* [ ] Pull Request時にCIが実行されるようにする
-* [ ] mainへのpush時にCIが実行されるようにする
 * [ ] GitHub labelsを作成する
 * [ ] GitHub milestonesを作成する
 * [ ] GitHub Projectsを作成する
 * [ ] Project statusを作成する
 * [ ] Ready条件を定義する
 * [ ] Phase 3以降の初期Issueを作成する
-* [ ] 各IssueにSummaryを書く
-* [ ] 各IssueにScopeを書く
-* [ ] 各IssueにRequirementsを書く
-* [ ] 各IssueにAcceptance criteriaを書く
-* [ ] 各IssueにNon-goalsを書く
-* [ ] 各Issueに適切なlabelを付ける
-* [ ] 各Issueにmilestoneを設定する
 * [ ] Codexに依頼できるIssueに `agent: codex-ready` を付ける
-* [ ] `SECURITY.md` を作成するか検討する
-* [ ] 認証情報の扱い方針を書く
-* [ ] Cookie保存方針を書く
-* [ ] CSRF tokenをログ出力しない方針を書く
-* [ ] debug HTML保存時の注意点を書く
-* [ ] AtCoderに過剰アクセスしない方針を書く
-* [ ] ポーリング間隔の方針を書く
-* [ ] キャッシュ利用方針を書く
-* [ ] 提出連打防止方針を書く
-* [ ] AI連携を初期段階で扱わない方針を書く
 
 ### Phase 2 完了条件
 
-* [ ] CODEX.mdにCodex向け作業指示が書かれている
+* [ ] `AGENTS.md` にCodex向け作業指示が書かれている
+* [ ] `AGENTS.md` にBranch命名規則が書かれている
+* [ ] `AGENTS.md` にCommit message規則が書かれている
+* [ ] `AGENTS.md` にPR作成ルールが書かれている
 * [ ] Issue templateが作成されている
 * [ ] PR templateが作成されている
 * [ ] CIが作成されている
