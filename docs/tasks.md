@@ -539,25 +539,25 @@ cargo-ac/
 ### タスク
 
 * [x] Rust workspaceを作成する
-* [ ] `cargo-ac` CLI crateを作成する
-* [ ] `ac-core` library crateを作成する
-* [ ] `clap` を導入する
-* [ ] CLIコマンド構造を定義する
-* [ ] placeholder command handlersを追加する
-* [ ] CLI境界での基本的なエラーハンドリングを追加する
-* [ ] `cargo ac --help` を表示できるようにする
-* [ ] 未実装コマンドで適切なメッセージを返す
-* [ ] `cargo fmt` を通す
-* [ ] `cargo test --all` を通す
+* [x] `cargo-ac` CLI crateを作成する
+* [x] `ac-core` library crateを作成する
+* [x] `clap` を導入する
+* [x] CLIコマンド構造を定義する
+* [x] placeholder command handlersを追加する
+* [x] CLI境界での基本的なエラーハンドリングを追加する
+* [x] `cargo ac --help` を表示できるようにする
+* [x] 未実装コマンドで適切なメッセージを返す
+* [x] `cargo fmt` を通す
+* [x] `cargo test --all` を通す
 
 ### Phase 3 完了条件
 
-* [ ] `cargo ac --help` が実行できる
-* [ ] 主要コマンドのhelpが表示できる
-* [ ] 未実装コマンドが適切なメッセージを返す
-* [ ] `cargo fmt --all -- --check` が通る
-* [ ] `cargo clippy --all-targets --all-features -- -D warnings` が通る
-* [ ] `cargo test --all` が通る
+* [x] `cargo ac --help` が実行できる
+* [x] 主要コマンドのhelpが表示できる
+* [x] 未実装コマンドが適切なメッセージを返す
+* [x] `cargo fmt --all -- --check` が通る
+* [x] `cargo clippy --all-targets --all-features -- -D warnings` が通る
+* [x] `cargo test --all` が通る
 
 ## Phase 4: ローカルプロジェクト生成
 
