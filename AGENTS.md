@@ -406,6 +406,20 @@ Issue対応時は、以下の順番で進めてください。
 9. `cargo test` を実行する
 10. Pull Request本文に変更内容と確認結果を書く
 
+## Issue作業完了時の報告
+
+Issue実装完了後、最終報告の末尾に以下の形式で完了スクリプトの実行コマンドを記載してください。
+
+```bash
+./scripts/finish-codex-issue.sh \
+  <issue-number> \
+  "<conventional-commit-message>"
+```
+
+Codexはこのスクリプトを自動実行せず、ユーザーが確認して実行できるコマンドとして出力してください。
+
+コミットメッセージは、IssueのPlanning metadataとこのドキュメントのConventional Commits規則に従ってください。
+
 ## 実装時に避けること
 
 以下は避けてください。
