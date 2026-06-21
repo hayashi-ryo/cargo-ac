@@ -2,132 +2,128 @@ name: Feature request
 description: 新機能・改善提案
 title: "feat: "
 labels:
+  - "type: feature"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature request
 
-* "type: feature"
-  body:
+        このIssueは、`cargo-ac` の新機能または改善提案を管理するためのものです。
 
-* type: markdown
-  attributes:
-  value: |
-  ## Feature request
+        Codexに依頼する場合は、Scope、Acceptance criteria、Non-goalsをできるだけ明確にしてください。
 
-  ```
-  このIssueは、`cargo-ac` の新機能または改善提案を管理するためのものです。
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: 何を実現したいかを簡潔に書いてください。
+      placeholder: 例）`cargo ac new <contest>` でAtCoder用Rustプロジェクトを生成できるようにする。
+    validations:
+      required: true
 
-  Codexに依頼する場合は、Scope、Acceptance criteria、Non-goalsをできるだけ明確にしてください。
-  ```
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: なぜこの対応が必要かを書いてください。
+      placeholder: 例）AtCoder参加時に毎回Cargoプロジェクトやsrc/binを手作業で作成するのが面倒なため。
+    validations:
+      required: false
 
-* type: textarea
-  id: summary
-  attributes:
-  label: Summary
-  description: 何を実現したいかを簡潔に書いてください。
-  placeholder: 例）`cargo ac new <contest>` でAtCoder用Rustプロジェクトを生成できるようにする。
-  validations:
-  required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: このIssueで対応する範囲を書いてください。
+      placeholder: |
+        - CLIに `new` コマンドを追加する
+        - コンテスト用ディレクトリを作成する
+        - `Cargo.toml` を生成する
+        - `src/bin/a.rs` などを生成する
+    validations:
+      required: true
 
-* type: textarea
-  id: background
-  attributes:
-  label: Background
-  description: なぜこの対応が必要かを書いてください。
-  placeholder: 例）AtCoder参加時に毎回Cargoプロジェクトやsrc/binを手作業で作成するのが面倒なため。
-  validations:
-  required: false
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: 実装要件を書いてください。
+      placeholder: |
+        - 既存ディレクトリがある場合はエラーにする
+        - 生成するRustファイルには最小テンプレートを入れる
+        - `ac.toml` の生成は別Issueに分ける
+    validations:
+      required: true
 
-* type: textarea
-  id: scope
-  attributes:
-  label: Scope
-  description: このIssueで対応する範囲を書いてください。
-  placeholder: |
-  - CLIに `new` コマンドを追加する
-  - コンテスト用ディレクトリを作成する
-  - `Cargo.toml` を生成する
-  - `src/bin/a.rs` などを生成する
-  validations:
-  required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: 完了条件を書いてください。
+      placeholder: |
+        - [ ] `cargo ac new abc400` が実行できる
+        - [ ] `abc400/Cargo.toml` が生成される
+        - [ ] `abc400/src/bin/a.rs` が生成される
+        - [ ] `cargo test --all` が通る
+    validations:
+      required: true
 
-* type: textarea
-  id: requirements
-  attributes:
-  label: Requirements
-  description: 実装要件を書いてください。
-  placeholder: |
-  - 既存ディレクトリがある場合はエラーにする
-  - 生成するRustファイルには最小テンプレートを入れる
-  - `ac.toml` の生成は別Issueに分ける
-  validations:
-  required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: このIssueでは対応しないことを書いてください。
+      placeholder: |
+        - AtCoderからのサンプル取得は行わない
+        - ログイン処理は行わない
+        - 提出処理は行わない
+    validations:
+      required: true
 
-* type: textarea
-  id: acceptance_criteria
-  attributes:
-  label: Acceptance criteria
-  description: 完了条件を書いてください。
-  placeholder: |
-  - [ ] `cargo ac new abc400` が実行できる
-  - [ ] `abc400/Cargo.toml` が生成される
-  - [ ] `abc400/src/bin/a.rs` が生成される
-  - [ ] `cargo test --all` が通る
-  validations:
-  required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: 主な対象領域を選択してください。
+      options:
+        - cli
+        - core
+        - config
+        - runner
+        - testcase
+        - atcoder
+        - parser
+        - auth
+        - submit
+        - env
+        - ci
+        - docs
+    validations:
+      required: true
 
-* type: textarea
-  id: non_goals
-  attributes:
-  label: Non-goals
-  description: このIssueでは対応しないことを書いてください。
-  placeholder: |
-  - AtCoderからのサンプル取得は行わない
-  - ログイン処理は行わない
-  - 提出処理は行わない
-  validations:
-  required: true
+  - type: dropdown
+    id: codex_ready
+    attributes:
+      label: Codex ready?
+      description: Codexにそのまま依頼できる粒度ですか？
+      options:
+        - "yes"
+        - "no"
+        - needs human design
+        - needs careful review
+    validations:
+      required: true
 
-* type: dropdown
-  id: area
-  attributes:
-  label: Area
-  description: 主な対象領域を選択してください。
-  options:
-  - cli
-  - core
-  - config
-  - runner
-  - testcase
-  - atcoder
-  - parser
-  - auth
-  - submit
-  - env
-  - ci
-  - docs
-  validations:
-  required: true
-
-* type: dropdown
-  id: codex_ready
-  attributes:
-  label: Codex ready?
-  description: Codexにそのまま依頼できる粒度ですか？
-  options:
-  - "yes"
-  - "no"
-  - "needs human design"
-  - "needs careful review"
-  validations:
-  required: true
-
-* type: textarea
-  id: notes_for_codex
-  attributes:
-  label: Notes for Codex
-  description: Codexに作業させる場合の追加指示を書いてください。
-  placeholder: |
-  - Issue範囲外の機能は実装しない
-  - public APIは最小限にする
-  - 必要に応じてテストを追加する
-  - `cargo fmt` と `cargo test --all` を実行する
-  validations:
-  required: false
+  - type: textarea
+    id: notes_for_codex
+    attributes:
+      label: Notes for Codex
+      description: Codexに作業させる場合の追加指示を書いてください。
+      placeholder: |
+        - Issue範囲外の機能は実装しない
+        - public APIは最小限にする
+        - 必要に応じてテストを追加する
+        - `cargo fmt` と `cargo test --all` を実行する
+    validations:
+      required: false

@@ -420,6 +420,27 @@ Codexはこのスクリプトを自動実行せず、ユーザーが確認して
 
 コミットメッセージは、IssueのPlanning metadataとこのドキュメントのConventional Commits規則に従ってください。
 
+## Phase完了時の全体監査
+
+各Phaseの最後のIssueが完了した時点で、Phase 0から完了したPhaseまでを通して監査してください。
+
+監査では以下を行ってください。
+
+1. 各Phaseの目的、タスク、完了条件をrepositoryの成果物、merged Issue、テスト結果と照合する
+2. `docs/tasks.md` のcheckboxを確認できた事実に基づいて更新する
+3. 未実施タスクを具体的に列挙し、文書のずれは監査Issue内で修正する
+4. 実装、repository設定、外部サービスの変更が必要な項目は、勝手に対応せず後続Issue候補として記録する
+5. `docs/ROADMAP.md` と関連文書を現在の進捗および次Phaseの作業順に合わせる
+6. repository外の設定を確認できない場合は、完了を推測せず未確認であることを記録する
+
+監査対象は直前のPhaseだけに限定せず、過去Phaseの文書や前提が現在の実装とずれていないかも確認してください。
+
+### GitHub Projectの監査
+
+GitHub ProjectをAPIで確認する前に、`gh auth status`でtoken scopeを確認してください。`read:project` scopeがある場合のみ、`gh project list`またはGraphQL APIでProjectとstatus fieldを取得します。
+
+`read:project` scopeがない場合はProject APIを実行せず、ユーザーにGitHub Web UIでの確認を依頼してください。Web UIで確認済みとの回答を得た場合は、その確認日と結果を`docs/tasks.md`へ記録します。scope不足は監査コマンドのエラーとして扱わず、確認方法をWeb UIへ切り替えてください。
+
 ## 実装時に避けること
 
 以下は避けてください。

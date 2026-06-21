@@ -103,11 +103,14 @@
 | `cargo ac new` | Rust用AtCoderプロジェクトを生成する |
 | `cargo ac download` | 問題ページからサンプルを取得する |
 | `cargo ac test` | ローカルでサンプルテストを実行する |
+| `cargo ac addcase` | 自作テストケースを追加する |
 | `cargo ac login` | AtCoderにログインする |
 | `cargo ac submit` | コードを提出する |
 | `cargo ac watch` | 提出結果を監視する |
 | `cargo ac lang refresh` | Rustのlanguage_idを更新する |
 | `cargo ac doctor` | ローカル環境を簡易診断する |
+| `cargo ac selfcheck` | AtCoder側の構造変更を検知する |
+| `cargo ac env` | AtCoder Rust環境情報を扱う |
 
 ### 初期段階ではやらないこと
 
@@ -119,6 +122,7 @@
 | VSCode拡張 | CLI安定後に検討するため |
 | ブラウザ自動操作 | HTML/HTTPベースの実装を優先するため |
 | 高度な統計機能 | 初期MVPの価値から外れるため |
+| コンテスト中の外部AI連携 | ルール・安全面で慎重に扱う必要があるため |
 
 ### タスク
 
@@ -253,7 +257,7 @@ debug-html/
 * [x] リポジトリ説明文を設定する
 * [x] Topicsを設定する
 * [x] README.mdを作成する
-* [x] LICENSEを追加する
+* [x] `LICENSE-MIT` と `LICENSE-APACHE` を追加する
 * [x] .gitignoreを追加する
 * [x] docsディレクトリを作成する
 * [x] docs/tasks.mdを追加する
@@ -266,13 +270,13 @@ debug-html/
 * [x] `LICENSE-MIT` を追加する
 * [x] `LICENSE-APACHE` を追加する
 * [x] READMEに `MIT OR Apache-2.0` と明記する
-* [ ] `Cargo.toml` の `license` に `MIT OR Apache-2.0` を設定する
+* [x] `Cargo.toml` の `license` に `MIT OR Apache-2.0` を設定する
 
 ### Phase 1 完了条件
 
 * [x] GitHub上に開発用リポジトリが存在する
 * [x] READMEにプロジェクトの目的と方針が書かれている
-* [x] LICENSEが存在する
+* [x] `LICENSE-MIT` と `LICENSE-APACHE` が存在する
 * [x] .gitignoreが存在する
 * [x] docs/tasks.mdが存在する
 * [x] docs/ROADMAP.mdが存在する
@@ -286,7 +290,7 @@ debug-html/
 Codexに実装を依頼する前に、Issue、PR、branch、commit、CI、レビュー、Project boardの運用ルールを整備する。
 
 このPhaseでは、人間がCodex作業のためのガードレールを作る。
-ここで作成する `CODEX.md`、Issue template、PR template、labels、milestones、Project board、branch protectionが、以降のCodex作業の前提となる。
+ここで作成する `AGENTS.md`、Issue template、PR template、labels、milestones、Project board、branch protectionが、以降のCodex作業の前提となる。
 
 ### 基本運用
 
@@ -407,7 +411,7 @@ test(runner): add WA case test
 | `v0.1.0-alpha.4: login and submit` | ログイン・提出 |
 | `v0.1.0: initial usable release` | 初回利用可能版 |
 
-### CODEX.md雛形
+### AGENTS.mdの基礎方針
 
 ```markdown
 # Instructions for Codex
@@ -459,6 +463,7 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 * [x] `.github/ISSUE_TEMPLATE/` ディレクトリを作成する
 * [x] `.github/ISSUE_TEMPLATE/feature.yml` を作成する
 * [x] bug用Issue templateを作成する
+* [x] feature / bug Issue Formを有効なYAMLへ修正する
 * [x] `.github/pull_request_template.md` を作成する
 * [x] `.github/workflows/ci.yml` を作成する
 * [x] Rust toolchainを設定する
@@ -467,8 +472,8 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 * [x] CIで `cargo test --all` を実行する
 * [x] GitHub labelsを作成する
 * [x] GitHub milestonesを作成する
-* [x] GitHub Projectsを作成する
-* [x] Project statusを作成する
+* [x] GitHub Projectsを作成する（2026-06-21にWeb UIで確認済み）
+* [x] Project statusを作成する（2026-06-21にWeb UIで確認済み）
 * [x] Ready条件を定義する
 * [x] Phase 3以降の初期Issueを作成する
 * [x] Codexに依頼できるIssueに `agent: codex-ready` を付ける
@@ -479,12 +484,12 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 * [x] `AGENTS.md` にBranch命名規則が書かれている
 * [x] `AGENTS.md` にCommit message規則が書かれている
 * [x] `AGENTS.md` にPR作成ルールが書かれている
-* [x] Issue templateが作成されている
+* [x] Issue templateがGitHub上で利用できる
 * [x] PR templateが作成されている
 * [x] CIが作成されている
 * [x] labelsが整理されている
 * [x] milestonesが作成されている
-* [x] Project boardが作成されている
+* [x] Project boardが作成されている（2026-06-21にWeb UIで確認済み）
 * [x] Branch protectionが設定されている
 * [x] Phase 3以降の初期Issueが登録されている
 * [x] Codexに依頼可能なIssueが1つ以上Readyになっている
@@ -505,6 +510,7 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 | `cargo ac new --help` | プロジェクト生成コマンドのヘルプ |
 | `cargo ac download --help` | 問題取得コマンドのヘルプ |
 | `cargo ac test --help` | テストコマンドのヘルプ |
+| `cargo ac addcase --help` | 自作ケース追加コマンドのヘルプ |
 | `cargo ac submit --help` | 提出コマンドのヘルプ |
 | `cargo ac watch --help` | 結果監視コマンドのヘルプ |
 | `cargo ac doctor --help` | 診断コマンドのヘルプ |
@@ -518,14 +524,14 @@ This repository implements `cargo-ac`, a modern AtCoder CLI for Rust users.
 cargo-ac/
 ├── Cargo.toml
 ├── README.md
-├── LICENSE
+├── LICENSE-MIT
+├── LICENSE-APACHE
 ├── .gitignore
-├── CODEX.md
+├── AGENTS.md
 ├── docs/
 │   ├── ROADMAP.md
-│   ├── CONTRIBUTING.md
-│   ├── BRANCHING.md
 │   ├── ARCHITECTURE.md
+│   ├── development-environment.md
 │   └── tasks.md
 ├── crates/
 │   ├── cargo-ac/
@@ -533,6 +539,8 @@ cargo-ac/
 └── .github/
     ├── workflows/
     ├── ISSUE_TEMPLATE/
+    │   ├── feature.yml
+    │   └── bug.yml
     └── pull_request_template.md
 ```
 
@@ -563,7 +571,7 @@ cargo-ac/
 
 ### 目的
 
-AtCoderにアクセスしないローカル機能として `new` / `init` を実装する。
+AtCoderにアクセスしないローカル機能として `cargo ac new <contest>` を実装する。
 
 ### 生成される構成
 
@@ -602,33 +610,70 @@ abc400/
 
 ### タスク
 
-* [ ] `cargo ac new <contest>` を実装する
-* [ ] コンテスト用ディレクトリを生成する
-* [ ] `Cargo.toml` を生成する
-* [ ] `ac.toml` を生成する
-* [ ] `src/bin/*.rs` を生成する
-* [ ] `testcases/*` ディレクトリを生成する
-* [ ] デフォルトテンプレートを用意する
-* [ ] 既存ディレクトリがある場合の挙動を決める
-* [ ] `--force` オプションの必要性を検討する
-* [ ] workspace generationのテストを追加する
+* [x] `cargo ac new <contest>` を実装する
+* [x] コンテスト用ディレクトリを生成する
+* [x] `Cargo.toml` を生成する
+* [x] `ac.toml` を生成する
+* [x] `src/bin/*.rs` を生成する
+* [x] `testcases/*` ディレクトリを生成する
+* [x] デフォルトテンプレートを用意する
+* [x] 既存ディレクトリを上書きせずエラーにする
+* [x] `--force` をPhase 4のNon-goalとする
+* [x] workspace generationのintegration testを追加する
 
 ### Phase 4 完了条件
 
-* [ ] `cargo ac new abc400` が実行できる
-* [ ] コンテスト用ディレクトリが生成される
-* [ ] `Cargo.toml` が生成される
-* [ ] `ac.toml` が生成される
-* [ ] `src/bin/*.rs` が生成される
-* [ ] `testcases/*` が生成される
-* [ ] 生成処理のテストがある
-* [ ] CIが通る
+* [x] `cargo ac new abc400` が実行できる
+* [x] コンテスト用ディレクトリが生成される
+* [x] `Cargo.toml` が生成される
+* [x] `ac.toml` が生成される
+* [x] `src/bin/*.rs` が生成される
+* [x] `testcases/*` が生成される
+* [x] 生成処理のテストがある
+* [x] CIが通る
+
+### Phase 0〜4監査結果（2026-06-21）
+
+repository内の成果物、merged Issue、GitHub APIで取得できる設定、CI結果、ローカル検証を照合した。
+
+| Phase | 判定 | 根拠・残課題 |
+| --- | --- | --- |
+| Phase 0 | 完了 | 目的、初期MVP、Non-goalsとREADMEの初期機能一覧を確認済み |
+| Phase 1 | 完了 | repository、README、dual license、`.gitignore`、基本docs、Cargo license、GitHub Topicsを確認済み |
+| Phase 2 | 完了 | `AGENTS.md`、Issue Forms、PR template、CI、labels、milestones、Project board、branch protection、Codex-ready Issueを確認済み |
+| Phase 3 | 完了 | Issue #1〜#3、#6〜#8、#11の成果物とCLI・Docker環境を確認済み |
+| Phase 4 | 完了 | Issue #18〜#24の実装とintegration testが揃い、生成workspaceのbuild、既存path保護、不正入力拒否を確認済み |
+
+Phase 4の実装範囲に抜け漏れは確認されなかった。`cargo ac init`、`--force`、`--template`はPhase 4の実装IssueでNon-goalとされており、完了条件には含めない。
+
+監査で確認したfollow-upは以下とする。この監査Issueでは修正しない。
+
+* [x] GitHub repository Topicsを設定する
+* [x] `.github/ISSUE_TEMPLATE/feature.yml` と `.github/ISSUE_TEMPLATE/bug.yml` を有効なIssue Form YAMLへ修正する
+* [x] GitHub Web UIでProject boardとstatus fieldを再確認する
+
+文書内で完結する以下のずれは、この監査Issueで解消した。
+
+* [x] READMEの初期機能一覧へ`addcase`、`selfcheck`、`env`を反映する
+* [x] `docs/ARCHITECTURE.md` の想定構成を`AGENTS.md`とPhase 4の実装moduleに合わせる
+* [x] `AGENTS.md` にPhase完了時の全体監査ルールを追加する
 
 ## Phase 5: ローカルテスト実行
 
 ### 目的
 
 AtCoder提出前にローカルでサンプル確認する。
+
+### 実装順序
+
+1. testcase discoveryと`.in` / `.out` pair検証
+2. task binary実行、標準入出力取得、timeout
+3. output normalization、比較、AC / WA / RE / TLE、WA diff
+4. `cargo ac test <task>`、`all`、`--release`への接続
+5. `cargo ac addcase <task>`
+6. test runner integration test
+
+個別Issue候補は `.github/initial-issues/016-phase-5-and-later-implementation-backlog.md` を基準とする。
 
 ### 対象コマンド
 
@@ -1013,7 +1058,7 @@ AtCoderへのログイン状態を管理する。
 * [ ] integration testを整備する
 * [ ] issue templateを整備する
 * [ ] PR templateを整備する
-* [ ] CODEX.mdを整備する
+* [ ] AGENTS.mdをrelease運用に合わせて見直す
 * [ ] セキュリティ方針を書く
 * [ ] AtCoderに過剰アクセスしない方針を書く
 * [ ] crates.io用metadataを整備する
@@ -1041,12 +1086,12 @@ AtCoderへのログイン状態を管理する。
 | LICENSE作成 | ライセンスを明記する |
 | .gitignore作成 | 不要ファイル・認証情報を除外する |
 | docs/tasks.md作成 | 全体タスクを管理する |
-| CODEX.md作成 | Codex向け指示を書く |
+| AGENTS.md作成 | Codex向け指示を書く |
 | Issue / PR template作成 | Codex作業とレビューを安定させる |
 | GitHub Actions CI作成 | fmt / clippy / testを自動化する |
 | Rust workspace作成 | crate構成の土台を作る |
 | CLI skeleton | コマンド体系を作る |
-| new/init | プロジェクト生成 |
+| `cargo ac new` | プロジェクト生成 |
 | ac.toml | 設定ファイル管理 |
 | sample testcase format | テストケース構造 |
 | test runner | ローカルテスト実行 |
@@ -1090,7 +1135,7 @@ AtCoderへのログイン状態を管理する。
 | ブラウザ自動操作 | HTTP/HTMLベースで進めるため |
 | コンテスト中の外部AI連携 | 安全・規約面で慎重に扱う必要があるため |
 
-## 推奨Issue分割
+## Issue実績と今後の候補
 
 ### Phase 3: CLI skeleton
 
@@ -1099,112 +1144,65 @@ AtCoderへのログイン状態を管理する。
 | #1 | Create Rust workspace |
 | #2 | Add cargo-ac CLI crate |
 | #3 | Add ac-core library crate |
-| #4 | Define clap command structure |
-| #5 | Add placeholder command handlers |
-| #6 | Add basic error handling at CLI boundary |
+| #6 | Define clap command structure |
+| #7 | Add placeholder command handlers |
+| #8 | Add basic error handling at CLI boundary |
+| #11 | Add Docker-based development environment |
 
 ### Phase 4: Local workspace
 
 | Issue | 内容 |
 | ----- | ------------------------------------------- |
-| #7 | Implement ac.toml data model |
-| #8 | Implement ac.toml read/write |
-| #9 | Implement cargo ac new |
-| #10 | Generate Cargo.toml for contest workspace |
-| #11 | Generate src/bin/*.rs from default template |
-| #12 | Generate testcases directories |
-| #13 | Add tests for workspace generation |
+| #17 | Create implementation issue drafts for Phase 4 and later |
+| #18 | Define `ac.toml` data model |
+| #19 | Implement `ac.toml` read/write |
+| #20 | Add contest workspace generator foundation |
+| #21 | Generate contest `Cargo.toml` |
+| #22 | Generate default task sources and testcase directories |
+| #23 | Implement `cargo ac new` command |
+| #24 | Add contest workspace generation integration tests |
 
-### Phase 5: Test runner
+### Phase 5以降
 
-| Issue | 内容 |
-| ----- | ---------------------------------- |
-| #14 | Implement testcase discovery |
-| #15 | Implement testcase pair validation |
-| #16 | Implement cargo run execution |
-| #17 | Implement output normalization |
-| #18 | Implement AC/WA result display |
-| #19 | Implement diff display for WA |
-| #20 | Implement cargo ac addcase |
-| #21 | Add tests for test runner |
-
-### Phase 6: AtCoder download
-
-| Issue | 内容 |
-| ----- | ------------------------------------------- |
-| #22 | Add HTTP client foundation |
-| #23 | Implement task page fetch |
-| #24 | Implement sample parser for Japanese labels |
-| #25 | Implement sample parser for English labels |
-| #26 | Save debug HTML on parse failure |
-| #27 | Implement contest task list parser |
-| #28 | Implement cargo ac download |
-| #29 | Add parser fixture tests |
-
-### Phase 7: Login and submit
-
-| Issue | 内容 |
-| ----- | -------------------------------------------- |
-| #30 | Implement login page parser |
-| #31 | Implement CSRF token extraction |
-| #32 | Implement session cookie storage abstraction |
-| #33 | Implement cargo ac login |
-| #34 | Implement cargo ac whoami |
-| #35 | Implement language selector parser |
-| #36 | Implement language_id resolver for Rust |
-| #37 | Implement submit form parser |
-| #38 | Implement cargo ac submit preflight checks |
-| #39 | Implement submit POST |
-| #40 | Implement submission result watch |
-
-### Phase 9: Maintenance features
-
-| Issue | 内容 |
-| ----- | ---------------------------------------------- |
-| #41 | Implement cargo ac doctor basic checks |
-| #42 | Implement cargo ac selfcheck |
-| #43 | Implement env data model |
-| #44 | Implement cargo ac env show |
-| #45 | Implement cargo ac env update from static JSON |
-| #46 | Add weekly compatibility CI workflow |
+Phase 5〜10はまだ個別Issue番号を割り当てていない。候補と依存順は `.github/initial-issues/016-phase-5-and-later-implementation-backlog.md` を基準とし、Issue登録時に実際の番号を割り当てる。旧計画の仮番号は、登録済みIssue番号との混同を避けるため使用しない。
 
 ## 初期マイルストーン
 
 ### Milestone 1: GitHubリポジトリ初期作成
 
-* [ ] GitHub repository exists
-* [ ] README exists
-* [ ] LICENSE exists
-* [ ] .gitignore exists
-* [ ] docs/tasks.md exists
-* [ ] docs/ROADMAP.md exists
-* [ ] docs/ARCHITECTURE.md exists
+* [x] GitHub repository exists
+* [x] README exists
+* [x] `LICENSE-MIT` and `LICENSE-APACHE` exist
+* [x] .gitignore exists
+* [x] docs/tasks.md exists
+* [x] docs/ROADMAP.md exists
+* [x] docs/ARCHITECTURE.md exists
 
 ### Milestone 2: Codex前提のGitHub運用整備
 
-* [ ] CODEX.md exists
-* [ ] PR template exists
-* [ ] Issue template exists
-* [ ] GitHub Actions CI runs
-* [ ] Labels are created
-* [ ] Milestones are created
-* [ ] Project board is prepared
-* [ ] Branch protection is enabled
-* [ ] Codex-ready issue exists
+* [x] AGENTS.md exists
+* [x] PR template exists
+* [x] Issue Forms are valid and available on GitHub
+* [x] GitHub Actions CI runs
+* [x] Labels are created
+* [x] Milestones are created
+* [x] Project board is prepared
+* [x] Branch protection is enabled
+* [x] Codex-ready issue exists
 
 ### Milestone 3: CLIとして起動できる
 
-* [ ] `cargo ac --help` が実行できる
-* [ ] clapでコマンド一覧が表示される
-* [ ] 未実装コマンドが適切にメッセージを返す
+* [x] `cargo ac --help` が実行できる
+* [x] clapでコマンド一覧が表示される
+* [x] 未実装コマンドが適切にメッセージを返す
 
 ### Milestone 4: ローカルCLIとして使える
 
-* [ ] `cargo ac new abc400` が実行できる
-* [ ] `cd abc400` 後に作業できる
+* [x] `cargo ac new abc400` が実行できる
+* [x] `cd abc400` 後に作業できる
 * [ ] `cargo ac test a` が実行できる
 * [ ] `cargo ac addcase a` が実行できる
-* [ ] AtCoder連携なしでRust競プロ用プロジェクトを生成できる
+* [x] AtCoder連携なしでRust競プロ用プロジェクトを生成できる
 * [ ] 手動で置いたサンプルをテストできる
 * [ ] 自作ケースを追加できる
 
@@ -1234,23 +1232,25 @@ AtCoderへのログイン状態を管理する。
 
 ## 開発順序
 
-* [ ] コンセプト・仕様整理
-* [ ] GitHubリポジトリ作成
-* [ ] README / LICENSE / .gitignore 作成
-* [ ] docs/tasks.md 作成
-* [ ] docs/ROADMAP.md 作成
-* [ ] docs/ARCHITECTURE.md 作成
-* [ ] CODEX.md 作成
-* [ ] Issue / PR template 作成
-* [ ] GitHub Actions CI 作成
-* [ ] GitHub Project / labels / milestones 作成
-* [ ] Branch protection設定
-* [ ] Phase 3以降の初期Issue作成
-* [ ] Rust workspace作成
-* [ ] clapでCLI定義
-* [ ] new/init 実装
-* [ ] ac.toml 読み書き
-* [ ] testcases構造定義
+* [x] コンセプト・仕様整理
+* [x] GitHubリポジトリ作成
+* [x] README / dual license / .gitignore 作成
+* [x] docs/tasks.md 作成
+* [x] docs/ROADMAP.md 作成
+* [x] docs/ARCHITECTURE.md 作成
+* [x] AGENTS.md 作成
+* [x] Issue Forms修正
+* [x] PR template作成
+* [x] GitHub Actions CI 作成
+* [x] GitHub Project確認
+* [x] labels / milestones 作成
+* [x] Branch protection設定
+* [x] Phase 3以降の初期Issue作成
+* [x] Rust workspace作成
+* [x] clapでCLI定義
+* [x] `cargo ac new` 実装
+* [x] ac.toml 読み書き
+* [x] testcases構造定義
 * [ ] cargo run実行処理
 * [ ] expected/actual比較
 * [ ] addcase
