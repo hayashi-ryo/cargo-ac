@@ -30,11 +30,14 @@ Rustを書く人にとって気持ちいい、現代的なAtCoder CLI。
 | `cargo ac new` | AtCoder用のRustプロジェクトを生成する |
 | `cargo ac download` | 問題ページからサンプルを取得する |
 | `cargo ac test` | ローカルでサンプルテストを実行する |
+| `cargo ac addcase` | 自作テストケースを追加する |
 | `cargo ac login` | AtCoderにログインする |
 | `cargo ac submit` | コードを提出する |
 | `cargo ac watch` | 提出結果を監視する |
 | `cargo ac lang refresh` | Rustの提出用language_idを更新する |
 | `cargo ac doctor` | ローカル環境や設定を簡易診断する |
+| `cargo ac selfcheck` | AtCoder側の構造変更を検知する |
+| `cargo ac env` | AtCoder Rust環境情報を扱う |
 
 ## 想定する利用例
 
