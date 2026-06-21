@@ -1,5 +1,5 @@
 [workspace]
-members = []
+members = ["crates/cargo-ac"]
 resolver = "2"
 
 [workspace.package]
