@@ -77,10 +77,10 @@ cargo_fmt_status="[ ]"
 cargo_clippy_status="[ ]"
 cargo_test_status="[ ]"
 
-git_diff_check_note=""
-cargo_fmt_note=""
-cargo_clippy_note=""
-cargo_test_note=""
+git_diff_check_note="OK"
+cargo_fmt_note="OK"
+cargo_clippy_note="OK"
+cargo_test_note="OK"
 
 if run_check "git diff --check" git diff --check; then
 git_diff_check_status="[x]"
@@ -190,9 +190,14 @@ git commit -m "$commit_message"
 
 git push -u origin "$current_branch"
 
-gh pr create 
---base main 
---head "$current_branch" 
---title "$commit_message" 
---body-file ".codex/pr-bodies/${issue_number}.md"
-EOF
+existing_pr_url="$(
+  gh pr view "$current_branch" --json url --jq '.url' 2>/dev/null || true
+)"
+
+if [ -n "$existing_pr_url" ]; then
+  echo
+  echo "Pull request already exists:"
+  echo "$existing_pr_url"
+else
+  gh pr create --base main --head "$current_branch" --title "$commit_message" --body-file ".codex/pr-bodies/${issue_number}.md"
+fi
