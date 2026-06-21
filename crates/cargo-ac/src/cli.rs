@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+use crate::commands::{self, CommandResult};
+
 #[derive(Parser)]
 #[command(bin_name = "cargo ac")]
 pub(crate) struct Cli {
@@ -51,35 +53,34 @@ pub(crate) enum LangCommand {
     Refresh,
 }
 
-pub(crate) fn dispatch(command: Command) {
+pub(crate) fn dispatch(command: Command) -> CommandResult {
     match command {
-        Command::New { .. }
-        | Command::Download { .. }
-        | Command::Test { .. }
-        | Command::Addcase { .. }
-        | Command::Login
-        | Command::Submit { .. }
-        | Command::Watch
-        | Command::Doctor
-        | Command::Selfcheck => placeholder_handler(),
+        Command::New { contest } => commands::new::run(contest),
+        Command::Download { contest } => commands::download::run(contest),
+        Command::Test { task } => commands::test::run(task),
+        Command::Addcase { task } => commands::addcase::run(task),
+        Command::Login => commands::login::run(),
+        Command::Submit { task, watch } => commands::submit::run(task, watch),
+        Command::Watch => commands::watch::run(),
+        Command::Doctor => commands::doctor::run(),
+        Command::Selfcheck => commands::selfcheck::run(),
         Command::Env { command } => dispatch_env(command),
         Command::Lang { command } => dispatch_lang(command),
     }
 }
 
-fn dispatch_env(command: EnvCommand) {
+fn dispatch_env(command: EnvCommand) -> CommandResult {
     match command {
-        EnvCommand::Show | EnvCommand::Update => placeholder_handler(),
+        EnvCommand::Show => commands::env::show(),
+        EnvCommand::Update => commands::env::update(),
     }
 }
 
-fn dispatch_lang(command: LangCommand) {
+fn dispatch_lang(command: LangCommand) -> CommandResult {
     match command {
-        LangCommand::Refresh => placeholder_handler(),
+        LangCommand::Refresh => commands::lang::refresh(),
     }
 }
-
-fn placeholder_handler() {}
 
 #[cfg(test)]
 mod tests {
