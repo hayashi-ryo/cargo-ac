@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::config::TaskConfig;
+use crate::{config::TaskConfig, manifest::is_valid_package_name};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WorkspaceRequest {
@@ -83,6 +83,13 @@ impl WorkspacePaths {
 pub fn create_workspace(request: &WorkspaceRequest) -> Result<WorkspacePaths, WorkspaceError> {
     let destination = request.destination();
 
+    if !is_valid_package_name(request.contest_id()) {
+        return Err(WorkspaceError::InvalidContestId {
+            path: destination.to_path_buf(),
+            contest_id: request.contest_id().to_owned(),
+        });
+    }
+
     match destination.try_exists() {
         Ok(true) => {
             return Err(WorkspaceError::DestinationExists {
@@ -116,6 +123,7 @@ pub fn create_workspace(request: &WorkspaceRequest) -> Result<WorkspacePaths, Wo
 
 #[derive(Debug)]
 pub enum WorkspaceError {
+    InvalidContestId { path: PathBuf, contest_id: String },
     DestinationExists { path: PathBuf },
     InspectDestination { path: PathBuf, source: io::Error },
     CreateRoot { path: PathBuf, source: io::Error },
@@ -124,7 +132,8 @@ pub enum WorkspaceError {
 impl WorkspaceError {
     pub fn path(&self) -> &Path {
         match self {
-            Self::DestinationExists { path }
+            Self::InvalidContestId { path, .. }
+            | Self::DestinationExists { path }
             | Self::InspectDestination { path, .. }
             | Self::CreateRoot { path, .. } => path,
         }
@@ -134,6 +143,9 @@ impl WorkspaceError {
 impl fmt::Display for WorkspaceError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::InvalidContestId { contest_id, .. } => {
+                write!(formatter, "invalid contest ID `{contest_id}`")
+            }
             Self::DestinationExists { path } => {
                 write!(
                     formatter,
@@ -158,7 +170,7 @@ impl fmt::Display for WorkspaceError {
 impl Error for WorkspaceError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            Self::DestinationExists { .. } => None,
+            Self::InvalidContestId { .. } | Self::DestinationExists { .. } => None,
             Self::InspectDestination { source, .. } | Self::CreateRoot { source, .. } => {
                 Some(source)
             }
@@ -240,5 +252,18 @@ mod tests {
             WorkspaceError::CreateRoot { source, .. }
                 if source.kind() == io::ErrorKind::NotFound
         ));
+    }
+
+    #[test]
+    fn rejects_invalid_contest_id_before_creating_destination() {
+        let directory = tempdir().expect("temporary directory should be created");
+        let destination = directory.path().join("outside");
+        let request = WorkspaceRequest::new(&destination, "../outside", Vec::new());
+
+        let error = create_workspace(&request).expect_err("invalid contest ID should fail");
+
+        assert_eq!(error.path(), destination);
+        assert!(matches!(error, WorkspaceError::InvalidContestId { .. }));
+        assert!(!destination.exists());
     }
 }
