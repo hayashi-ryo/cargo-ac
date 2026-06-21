@@ -201,3 +201,7 @@ if [ -n "$existing_pr_url" ]; then
 else
   gh pr create --base main --head "$current_branch" --title "$commit_message" --body-file ".codex/pr-bodies/${issue_number}.md"
 fi
+
+echo
+echo "Switching to main..."
+git switch main
