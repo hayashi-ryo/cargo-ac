@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::commands::{self, CommandResult};
+use crate::{commands, error::CliResult};
 
 #[derive(Parser)]
 #[command(bin_name = "cargo ac")]
@@ -53,7 +53,7 @@ pub(crate) enum LangCommand {
     Refresh,
 }
 
-pub(crate) fn dispatch(command: Command) -> CommandResult {
+pub(crate) fn dispatch(command: Command) -> CliResult {
     match command {
         Command::New { contest } => commands::new::run(contest),
         Command::Download { contest } => commands::download::run(contest),
@@ -69,14 +69,14 @@ pub(crate) fn dispatch(command: Command) -> CommandResult {
     }
 }
 
-fn dispatch_env(command: EnvCommand) -> CommandResult {
+fn dispatch_env(command: EnvCommand) -> CliResult {
     match command {
         EnvCommand::Show => commands::env::show(),
         EnvCommand::Update => commands::env::update(),
     }
 }
 
-fn dispatch_lang(command: LangCommand) -> CommandResult {
+fn dispatch_lang(command: LangCommand) -> CliResult {
     match command {
         LangCommand::Refresh => commands::lang::refresh(),
     }
