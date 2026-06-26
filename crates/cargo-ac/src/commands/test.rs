@@ -1,12 +1,174 @@
-use ac_core::output::{WrongAnswerDiff, WrongAnswerDiffLine};
+use ac_core::{
+    config::{ProjectConfig, TaskConfig},
+    output::{compare_output, WrongAnswerDiff, WrongAnswerDiffLine},
+    runner::{run_task_binary, RunnerProfile, TaskExecution, TaskRunRequest},
+    testcase::{discover_testcase_files, validate_testcase_pairs, TestcasePair},
+};
 
 use crate::error::CliResult;
 
-use std::io::{self, Write};
+use std::{error::Error, fmt, io, io::Write, path::Path, process::Command, time::Duration};
 
-pub(crate) fn run(_task: String) -> CliResult {
-    println!("`cargo ac test` is not implemented yet.");
+const CONFIG_FILE: &str = "ac.toml";
+const ALL_SELECTOR: &str = "all";
+const DEFAULT_TIMEOUT: Duration = Duration::from_secs(5);
+
+pub(crate) fn run(task: String, release: bool) -> CliResult {
+    let current_directory = std::env::current_dir()?;
+    let failed = run_in_workspace(&mut io::stdout(), &current_directory, &task, release)?;
+
+    if failed {
+        return Err(Box::new(TestCommandError::Failed));
+    }
+
     Ok(())
+}
+
+fn run_in_workspace(
+    writer: &mut impl Write,
+    workspace_root: &Path,
+    task_selector: &str,
+    release: bool,
+) -> Result<bool, Box<dyn Error>> {
+    let config = ProjectConfig::read(workspace_root.join(CONFIG_FILE))?;
+    let tasks = select_tasks(&config, task_selector)?;
+    let profile = if release {
+        RunnerProfile::Release
+    } else {
+        RunnerProfile::Debug
+    };
+    let mut failed = false;
+
+    for task in tasks {
+        build_task(workspace_root, task.bin_name(), profile)?;
+        let result = run_task_cases(workspace_root, &config, task, profile)?;
+        write_task_result(writer, &result)?;
+
+        let summary = result.summary();
+        if summary.total() == 0
+            || summary.wrong_answer() > 0
+            || summary.runtime_error() > 0
+            || summary.time_limit_exceeded() > 0
+        {
+            failed = true;
+        }
+    }
+
+    Ok(failed)
+}
+
+fn select_tasks<'a>(
+    config: &'a ProjectConfig,
+    task_selector: &str,
+) -> Result<Vec<&'a TaskConfig>, TestCommandError> {
+    if task_selector == ALL_SELECTOR {
+        return Ok(config.tasks().iter().collect());
+    }
+
+    config
+        .tasks()
+        .iter()
+        .find(|task| task.bin_name() == task_selector)
+        .map(|task| vec![task])
+        .ok_or_else(|| TestCommandError::UnknownTask {
+            task: task_selector.to_owned(),
+            available: config
+                .tasks()
+                .iter()
+                .map(|task| task.bin_name().to_owned())
+                .collect(),
+        })
+}
+
+fn build_task(
+    workspace_root: &Path,
+    task_name: &str,
+    profile: RunnerProfile,
+) -> Result<(), TestCommandError> {
+    let mut command = Command::new(env!("CARGO"));
+    command
+        .current_dir(workspace_root)
+        .arg("build")
+        .arg("--quiet")
+        .arg("--bin")
+        .arg(task_name);
+
+    if profile == RunnerProfile::Release {
+        command.arg("--release");
+    }
+
+    let output = command
+        .output()
+        .map_err(|source| TestCommandError::BuildSpawn {
+            task: task_name.to_owned(),
+            source,
+        })?;
+
+    if !output.status.success() {
+        return Err(TestCommandError::BuildFailed {
+            task: task_name.to_owned(),
+            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+        });
+    }
+
+    Ok(())
+}
+
+fn run_task_cases(
+    workspace_root: &Path,
+    config: &ProjectConfig,
+    task: &TaskConfig,
+    profile: RunnerProfile,
+) -> Result<TaskDisplayResult, Box<dyn Error>> {
+    let discovery = discover_testcase_files(workspace_root, config, task)?;
+    let pairs = validate_testcase_pairs(&discovery)?;
+    let cases = pairs
+        .iter()
+        .map(|pair| run_testcase_pair(workspace_root, task.bin_name(), pair, profile))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(TaskDisplayResult::new(task.bin_name(), cases))
+}
+
+fn run_testcase_pair(
+    workspace_root: &Path,
+    task_name: &str,
+    pair: &TestcasePair,
+    profile: RunnerProfile,
+) -> Result<CaseDisplayResult, Box<dyn Error>> {
+    let request = TaskRunRequest::new(workspace_root, task_name, profile, DEFAULT_TIMEOUT);
+    let execution = run_task_binary(&request, pair.input())?;
+    let case_name = pair.logical_name().to_string_lossy().into_owned();
+
+    let outcome = match execution {
+        TaskExecution::TimedOut(_) => CaseOutcome::TimeLimitExceeded,
+        TaskExecution::Finished(output) if !output.exit_status().success() => {
+            CaseOutcome::RuntimeError {
+                exit_status: format_exit_status(output.exit_status().code()),
+                stderr: String::from_utf8_lossy(output.stderr()).into_owned(),
+            }
+        }
+        TaskExecution::Finished(output) => {
+            let comparison = compare_output(pair.expected_output(), output.stdout())?;
+
+            if comparison.matches() {
+                CaseOutcome::Accepted
+            } else {
+                CaseOutcome::WrongAnswer {
+                    diff: comparison.wrong_answer_diff(),
+                }
+            }
+        }
+    };
+
+    Ok(CaseDisplayResult::new(case_name, outcome))
+}
+
+fn format_exit_status(code: Option<i32>) -> String {
+    match code {
+        Some(code) => format!("exit code {code}"),
+        None => "terminated by signal".to_owned(),
+    }
 }
 
 #[allow(dead_code)]
@@ -21,8 +183,11 @@ pub(crate) fn write_task_result(
             CaseOutcome::Accepted => {
                 writeln!(writer, "[AC] {}", case.case_name())?;
             }
-            CaseOutcome::WrongAnswer => {
+            CaseOutcome::WrongAnswer { diff } => {
                 writeln!(writer, "[WA] {}", case.case_name())?;
+                if let Some(diff) = diff {
+                    write!(writer, "{}", format_wrong_answer_diff(diff))?;
+                }
             }
             CaseOutcome::RuntimeError {
                 exit_status,
@@ -120,7 +285,7 @@ impl CaseDisplayResult {
 #[allow(dead_code)]
 pub(crate) enum CaseOutcome {
     Accepted,
-    WrongAnswer,
+    WrongAnswer { diff: Option<WrongAnswerDiff> },
     RuntimeError { exit_status: String, stderr: String },
     TimeLimitExceeded,
 }
@@ -145,7 +310,7 @@ impl TaskResultSummary {
         for case in cases {
             match case.outcome() {
                 CaseOutcome::Accepted => summary.accepted += 1,
-                CaseOutcome::WrongAnswer => summary.wrong_answer += 1,
+                CaseOutcome::WrongAnswer { .. } => summary.wrong_answer += 1,
                 CaseOutcome::RuntimeError { .. } => summary.runtime_error += 1,
                 CaseOutcome::TimeLimitExceeded => summary.time_limit_exceeded += 1,
             }
@@ -172,6 +337,58 @@ impl TaskResultSummary {
 
     pub(crate) fn total(self) -> usize {
         self.accepted + self.wrong_answer + self.runtime_error + self.time_limit_exceeded
+    }
+}
+
+#[derive(Debug)]
+enum TestCommandError {
+    UnknownTask {
+        task: String,
+        available: Vec<String>,
+    },
+    BuildSpawn {
+        task: String,
+        source: io::Error,
+    },
+    BuildFailed {
+        task: String,
+        stderr: String,
+    },
+    Failed,
+}
+
+impl fmt::Display for TestCommandError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnknownTask { task, available } => write!(
+                formatter,
+                "unknown task `{}`; available tasks: {}",
+                task,
+                available.join(", ")
+            ),
+            Self::BuildSpawn { task, .. } => write!(formatter, "failed to build task `{task}`"),
+            Self::BuildFailed { task, stderr } => {
+                if stderr.trim().is_empty() {
+                    write!(formatter, "failed to build task `{task}`")
+                } else {
+                    write!(
+                        formatter,
+                        "failed to build task `{task}`: {}",
+                        stderr.trim()
+                    )
+                }
+            }
+            Self::Failed => formatter.write_str("one or more testcases failed"),
+        }
+    }
+}
+
+impl Error for TestCommandError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::BuildSpawn { source, .. } => Some(source),
+            Self::UnknownTask { .. } | Self::BuildFailed { .. } | Self::Failed => None,
+        }
     }
 }
 
@@ -237,7 +454,7 @@ mod tests {
             "a",
             vec![
                 CaseDisplayResult::new("sample1", CaseOutcome::Accepted),
-                CaseDisplayResult::new("sample2", CaseOutcome::WrongAnswer),
+                CaseDisplayResult::new("sample2", CaseOutcome::WrongAnswer { diff: None }),
                 CaseDisplayResult::new(
                     "sample3",
                     CaseOutcome::RuntimeError {
