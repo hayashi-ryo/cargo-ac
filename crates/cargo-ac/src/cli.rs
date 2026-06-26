@@ -19,6 +19,8 @@ pub(crate) enum Command {
     },
     Test {
         task: String,
+        #[arg(long)]
+        release: bool,
     },
     Addcase {
         task: String,
@@ -57,7 +59,7 @@ pub(crate) fn dispatch(command: Command) -> CliResult {
     match command {
         Command::New { contest } => commands::new::run(contest),
         Command::Download { contest } => commands::download::run(contest),
-        Command::Test { task } => commands::test::run(task),
+        Command::Test { task, release } => commands::test::run(task, release),
         Command::Addcase { task } => commands::addcase::run(task),
         Command::Login => commands::login::run(),
         Command::Submit { task, watch } => commands::submit::run(task, watch),
@@ -93,6 +95,8 @@ mod tests {
             &["cargo-ac", "new", "abc400"][..],
             &["cargo-ac", "download", "abc400"],
             &["cargo-ac", "test", "a"],
+            &["cargo-ac", "test", "a", "--release"],
+            &["cargo-ac", "test", "all", "--release"],
             &["cargo-ac", "addcase", "a"],
             &["cargo-ac", "login"],
             &["cargo-ac", "submit", "a"],
