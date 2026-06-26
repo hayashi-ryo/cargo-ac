@@ -87,9 +87,20 @@ fn main() {
 fn runs_all_tasks_in_config_order_and_reports_failure_status() {
     let directory = tempdir().expect("temporary directory should be created");
     write_workspace(directory.path(), &[("fixture_a", "a"), ("fixture_b", "b")]);
-    write_bin(directory.path(), "a", "fn main() { println!(\"ok\"); }");
+    write_bin(
+        directory.path(),
+        "a",
+        r#"fn main() {
+    if cfg!(debug_assertions) {
+        println!("debug");
+    } else {
+        println!("release");
+    }
+}
+"#,
+    );
     write_bin(directory.path(), "b", "fn main() { println!(\"ng\"); }");
-    write_case(directory.path(), "a", "sample1", "", "ok\n");
+    write_case(directory.path(), "a", "sample1", "", "release\n");
     write_case(directory.path(), "b", "sample1", "", "ok\n");
 
     let output = cargo_ac(directory.path())
@@ -105,6 +116,61 @@ fn runs_all_tasks_in_config_order_and_reports_failure_status() {
     assert!(stdout.contains("[AC] sample1"));
     assert!(stdout.contains("[WA] sample1"));
     assert!(stdout.contains("expected:"));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("one or more testcases failed"));
+}
+
+#[test]
+fn reports_runtime_error_with_exit_status_and_stderr() {
+    let directory = tempdir().expect("temporary directory should be created");
+    write_workspace(directory.path(), &[("fixture_a", "a")]);
+    write_bin(
+        directory.path(),
+        "a",
+        r#"fn main() {
+    eprintln!("runtime failure");
+    std::process::exit(7);
+}
+"#,
+    );
+    write_case(directory.path(), "a", "sample1", "", "unused\n");
+
+    let output = cargo_ac(directory.path())
+        .args(["test", "a"])
+        .output()
+        .expect("cargo-ac should run");
+
+    assert!(!output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("[RE] sample1"));
+    assert!(stdout.contains("exit status: exit code 7"));
+    assert!(stdout.contains("runtime failure"));
+    assert!(stdout.contains("summary: AC 0 WA 0 RE 1 TLE 0 total 1"));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("one or more testcases failed"));
+}
+
+#[test]
+fn reports_timeout_as_tle_and_returns_non_zero() {
+    let directory = tempdir().expect("temporary directory should be created");
+    write_workspace(directory.path(), &[("fixture_a", "a")]);
+    write_bin(
+        directory.path(),
+        "a",
+        r#"fn main() {
+    std::thread::sleep(std::time::Duration::from_secs(30));
+}
+"#,
+    );
+    write_case(directory.path(), "a", "sample1", "", "");
+
+    let output = cargo_ac(directory.path())
+        .args(["test", "a"])
+        .output()
+        .expect("cargo-ac should run");
+
+    assert!(!output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("[TLE] sample1 timed out"));
+    assert!(stdout.contains("summary: AC 0 WA 0 RE 0 TLE 1 total 1"));
     assert!(String::from_utf8_lossy(&output.stderr).contains("one or more testcases failed"));
 }
 
