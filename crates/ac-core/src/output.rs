@@ -28,6 +28,14 @@ impl OutputComparison {
     pub fn matches(&self) -> bool {
         self.matches
     }
+
+    pub fn wrong_answer_diff(&self) -> Option<WrongAnswerDiff> {
+        if self.matches {
+            return None;
+        }
+
+        Some(WrongAnswerDiff::from_comparison(self))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -53,6 +61,78 @@ pub fn compare_output(
     let actual = normalize_output(actual, OutputSide::Actual)?;
 
     Ok(OutputComparison::new(expected, actual))
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WrongAnswerDiff {
+    lines: Vec<WrongAnswerDiffLine>,
+}
+
+impl WrongAnswerDiff {
+    fn from_comparison(comparison: &OutputComparison) -> Self {
+        let expected = comparison
+            .expected()
+            .as_str()
+            .split('\n')
+            .collect::<Vec<_>>();
+        let actual = comparison.actual().as_str().split('\n').collect::<Vec<_>>();
+        let mut lines = Vec::new();
+
+        for index in 0..expected.len().max(actual.len()) {
+            let line_number = index + 1;
+
+            match (expected.get(index), actual.get(index)) {
+                (Some(expected), Some(actual)) if expected == actual => {}
+                (Some(expected), Some(actual)) => lines.push(WrongAnswerDiffLine::Different {
+                    line_number,
+                    expected: (*expected).to_owned(),
+                    actual: (*actual).to_owned(),
+                }),
+                (Some(expected), None) => lines.push(WrongAnswerDiffLine::MissingActual {
+                    line_number,
+                    expected: (*expected).to_owned(),
+                }),
+                (None, Some(actual)) => lines.push(WrongAnswerDiffLine::ExtraActual {
+                    line_number,
+                    actual: (*actual).to_owned(),
+                }),
+                (None, None) => {}
+            }
+        }
+
+        Self { lines }
+    }
+
+    pub fn lines(&self) -> &[WrongAnswerDiffLine] {
+        &self.lines
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum WrongAnswerDiffLine {
+    Different {
+        line_number: usize,
+        expected: String,
+        actual: String,
+    },
+    MissingActual {
+        line_number: usize,
+        expected: String,
+    },
+    ExtraActual {
+        line_number: usize,
+        actual: String,
+    },
+}
+
+impl WrongAnswerDiffLine {
+    pub fn line_number(&self) -> usize {
+        match self {
+            Self::Different { line_number, .. }
+            | Self::MissingActual { line_number, .. }
+            | Self::ExtraActual { line_number, .. } => *line_number,
+        }
+    }
 }
 
 fn normalize_output(
@@ -127,7 +207,7 @@ impl Error for OutputComparisonError {
 
 #[cfg(test)]
 mod tests {
-    use super::{compare_output, OutputComparisonError, OutputSide};
+    use super::{compare_output, OutputComparisonError, OutputSide, WrongAnswerDiffLine};
 
     #[test]
     fn treats_lf_and_crlf_line_endings_as_equal() {
@@ -196,5 +276,78 @@ mod tests {
 
         assert_eq!(error.side(), OutputSide::Actual);
         assert!(matches!(error, OutputComparisonError::InvalidUtf8 { .. }));
+    }
+
+    #[test]
+    fn creates_line_diff_for_multiline_wrong_answer() {
+        let comparison =
+            compare_output(b"alpha\nbeta\ngamma\n", b"alpha\nBET\ngamma\n").expect("valid UTF-8");
+        let diff = comparison.wrong_answer_diff().expect("WA should have diff");
+
+        assert_eq!(
+            diff.lines(),
+            &[WrongAnswerDiffLine::Different {
+                line_number: 2,
+                expected: "beta".to_owned(),
+                actual: "BET".to_owned(),
+            }]
+        );
+    }
+
+    #[test]
+    fn creates_line_diff_for_empty_output() {
+        let comparison = compare_output(b"expected\n", b"").expect("valid UTF-8");
+        let diff = comparison.wrong_answer_diff().expect("WA should have diff");
+
+        assert_eq!(
+            diff.lines(),
+            &[WrongAnswerDiffLine::Different {
+                line_number: 1,
+                expected: "expected".to_owned(),
+                actual: String::new(),
+            }]
+        );
+    }
+
+    #[test]
+    fn identifies_lines_that_exist_on_only_one_side() {
+        let missing_actual = compare_output(b"a\nb\n", b"a\n").expect("valid UTF-8");
+        let extra_actual = compare_output(b"a\n", b"a\nb\n").expect("valid UTF-8");
+
+        assert_eq!(
+            missing_actual
+                .wrong_answer_diff()
+                .expect("WA should have diff")
+                .lines(),
+            &[WrongAnswerDiffLine::MissingActual {
+                line_number: 2,
+                expected: "b".to_owned(),
+            }]
+        );
+        assert_eq!(
+            extra_actual
+                .wrong_answer_diff()
+                .expect("WA should have diff")
+                .lines(),
+            &[WrongAnswerDiffLine::ExtraActual {
+                line_number: 2,
+                actual: "b".to_owned(),
+            }]
+        );
+    }
+
+    #[test]
+    fn does_not_create_diff_for_normalized_trailing_only_difference() {
+        let comparison = compare_output(b"a \t\n", b"a").expect("valid UTF-8");
+
+        assert!(comparison.matches());
+        assert_eq!(comparison.wrong_answer_diff(), None);
+    }
+
+    #[test]
+    fn invalid_utf8_does_not_panic_before_diff_generation() {
+        let error = compare_output(&[0xff], b"actual").expect_err("invalid UTF-8 should fail");
+
+        assert_eq!(error.side(), OutputSide::Expected);
     }
 }
