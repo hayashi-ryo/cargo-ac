@@ -1,7 +1,10 @@
 use std::{
     error::Error,
     ffi::OsString,
-    fmt, fs, io,
+    fmt, fs,
+    fs::OpenOptions,
+    io,
+    io::Write,
     path::{Path, PathBuf},
 };
 
@@ -165,6 +168,85 @@ pub fn discover_testcase_files(
     });
 
     Ok(TestcaseDiscovery::new(directory, files))
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AddedTestcase {
+    logical_name: String,
+    input_path: PathBuf,
+    output_path: PathBuf,
+}
+
+impl AddedTestcase {
+    fn new(logical_name: String, input_path: PathBuf, output_path: PathBuf) -> Self {
+        Self {
+            logical_name,
+            input_path,
+            output_path,
+        }
+    }
+
+    pub fn logical_name(&self) -> &str {
+        &self.logical_name
+    }
+
+    pub fn input_path(&self) -> &Path {
+        &self.input_path
+    }
+
+    pub fn output_path(&self) -> &Path {
+        &self.output_path
+    }
+}
+
+pub fn add_custom_testcase(
+    project_root: impl AsRef<Path>,
+    config: &ProjectConfig,
+    task: &TaskConfig,
+    input: &[u8],
+    expected_output: &[u8],
+) -> Result<AddedTestcase, AddCustomTestcaseError> {
+    let discovery = discover_testcase_files(&project_root, config, task)
+        .map_err(AddCustomTestcaseError::Discover)?;
+    let case_number = next_custom_case_number(&discovery);
+    let logical_name = format!("custom-{case_number}");
+    let input_path = discovery.directory().join(format!("{logical_name}.in"));
+    let output_path = discovery.directory().join(format!("{logical_name}.out"));
+
+    write_new_file(&input_path, input).map_err(|source| AddCustomTestcaseError::WriteInput {
+        path: input_path.clone(),
+        source,
+    })?;
+    write_new_file(&output_path, expected_output).map_err(|source| {
+        AddCustomTestcaseError::WriteOutput {
+            path: output_path.clone(),
+            source,
+        }
+    })?;
+
+    Ok(AddedTestcase::new(logical_name, input_path, output_path))
+}
+
+fn next_custom_case_number(discovery: &TestcaseDiscovery) -> usize {
+    let mut number = 1;
+
+    loop {
+        let logical_name = format!("custom-{number}");
+        if discovery
+            .files()
+            .iter()
+            .all(|file| file.logical_name().to_string_lossy() != logical_name)
+        {
+            return number;
+        }
+
+        number += 1;
+    }
+}
+
+fn write_new_file(path: &Path, contents: &[u8]) -> Result<(), io::Error> {
+    let mut file = OpenOptions::new().write(true).create_new(true).open(path)?;
+    file.write_all(contents)
 }
 
 pub fn validate_testcase_pairs(
@@ -371,6 +453,51 @@ impl Error for TestcaseDiscoveryError {
 }
 
 #[derive(Debug)]
+pub enum AddCustomTestcaseError {
+    Discover(TestcaseDiscoveryError),
+    WriteInput { path: PathBuf, source: io::Error },
+    WriteOutput { path: PathBuf, source: io::Error },
+}
+
+impl AddCustomTestcaseError {
+    pub fn path(&self) -> &Path {
+        match self {
+            Self::Discover(source) => source.path(),
+            Self::WriteInput { path, .. } | Self::WriteOutput { path, .. } => path,
+        }
+    }
+}
+
+impl fmt::Display for AddCustomTestcaseError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Discover(source) => write!(formatter, "{source}"),
+            Self::WriteInput { path, .. } => {
+                write!(
+                    formatter,
+                    "failed to write testcase input `{}`",
+                    path.display()
+                )
+            }
+            Self::WriteOutput { path, .. } => write!(
+                formatter,
+                "failed to write testcase output `{}`",
+                path.display()
+            ),
+        }
+    }
+}
+
+impl Error for AddCustomTestcaseError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::Discover(source) => Some(source),
+            Self::WriteInput { source, .. } | Self::WriteOutput { source, .. } => Some(source),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub enum TestcaseValidationError {
     InvalidPairs { problems: Vec<TestcasePairProblem> },
     ReadFile { path: PathBuf, source: io::Error },
@@ -517,9 +644,9 @@ mod tests {
     use tempfile::tempdir;
 
     use super::{
-        discover_testcase_files, validate_testcase_file_candidates, validate_testcase_pairs,
-        DiscoveredTestcaseFile, TestcaseDiscoveryError, TestcaseFileKind, TestcasePairProblem,
-        TestcaseValidationError,
+        add_custom_testcase, discover_testcase_files, validate_testcase_file_candidates,
+        validate_testcase_pairs, AddCustomTestcaseError, DiscoveredTestcaseFile,
+        TestcaseDiscoveryError, TestcaseFileKind, TestcasePairProblem, TestcaseValidationError,
     };
     use crate::config::{ProjectConfig, TaskConfig};
 
@@ -685,6 +812,99 @@ mod tests {
             TestcaseDiscoveryError::ReadMetadata { source, .. }
                 if source.kind() == io::ErrorKind::NotFound
         ));
+    }
+
+    #[test]
+    fn adds_custom_testcase_with_next_available_number() {
+        let directory = tempdir().expect("temporary directory should be created");
+        let testcase_directory = directory.path().join("testcases/a");
+        fs::create_dir_all(&testcase_directory).expect("testcase directory should be created");
+        fs::write(testcase_directory.join("custom-1.in"), "existing input\n")
+            .expect("existing input should be written");
+        fs::write(testcase_directory.join("custom-2.out"), "existing output\n")
+            .expect("existing output should be written");
+
+        let added = add_custom_testcase(
+            directory.path(),
+            &config(),
+            &task(),
+            b"new input\n",
+            b"new output\n",
+        )
+        .expect("custom testcase should be added");
+
+        assert_eq!(added.logical_name(), "custom-3");
+        assert_eq!(added.input_path(), testcase_directory.join("custom-3.in"));
+        assert_eq!(added.output_path(), testcase_directory.join("custom-3.out"));
+        assert_eq!(
+            fs::read(testcase_directory.join("custom-3.in")).expect("input should be readable"),
+            b"new input\n"
+        );
+        assert_eq!(
+            fs::read(testcase_directory.join("custom-3.out")).expect("output should be readable"),
+            b"new output\n"
+        );
+        assert_eq!(
+            fs::read_to_string(testcase_directory.join("custom-1.in"))
+                .expect("existing input should remain"),
+            "existing input\n"
+        );
+    }
+
+    #[test]
+    fn add_custom_testcase_returns_directory_read_error() {
+        let directory = tempdir().expect("temporary directory should be created");
+        let expected = directory.path().join("testcases/a");
+
+        let error = add_custom_testcase(directory.path(), &config(), &task(), b"in", b"out")
+            .expect_err("missing directory should fail");
+
+        assert_eq!(error.path(), expected);
+        assert!(matches!(
+            error,
+            AddCustomTestcaseError::Discover(TestcaseDiscoveryError::ReadDirectory { .. })
+        ));
+    }
+
+    #[test]
+    fn add_custom_testcase_does_not_overwrite_existing_candidate() {
+        let directory = tempdir().expect("temporary directory should be created");
+        let testcase_directory = directory.path().join("testcases/a");
+        fs::create_dir_all(&testcase_directory).expect("testcase directory should be created");
+        fs::write(testcase_directory.join("custom-1.in"), "existing\n")
+            .expect("existing input should be written");
+        fs::write(testcase_directory.join("custom-1.out"), "existing\n")
+            .expect("existing output should be written");
+
+        let added = add_custom_testcase(directory.path(), &config(), &task(), b"in\n", b"out\n")
+            .expect("custom testcase should be added");
+
+        assert_eq!(added.logical_name(), "custom-2");
+        assert_eq!(
+            fs::read_to_string(testcase_directory.join("custom-1.in"))
+                .expect("existing input should remain"),
+            "existing\n"
+        );
+    }
+
+    #[test]
+    fn add_custom_testcase_reports_output_write_failure_after_input_creation() {
+        let directory = tempdir().expect("temporary directory should be created");
+        let testcase_directory = directory.path().join("testcases/a");
+        fs::create_dir_all(testcase_directory.join("custom-1.out"))
+            .expect("conflicting output directory should be created");
+
+        let error = add_custom_testcase(directory.path(), &config(), &task(), b"in\n", b"out\n")
+            .expect_err("output path conflict should fail");
+
+        assert_eq!(error.path(), testcase_directory.join("custom-1.out"));
+        assert!(matches!(error, AddCustomTestcaseError::WriteOutput { .. }));
+        assert_eq!(
+            fs::read_to_string(testcase_directory.join("custom-1.in"))
+                .expect("input side should have been written before output failure"),
+            "in\n"
+        );
+        assert!(testcase_directory.join("custom-1.out").is_dir());
     }
 
     #[test]
