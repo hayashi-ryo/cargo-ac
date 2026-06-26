@@ -1,6 +1,6 @@
 use std::{
     fs,
-    io::Write,
+    io::{self, Write},
     path::Path,
     process::{Command, Stdio},
 };
@@ -21,12 +21,20 @@ fn run_with_stdin(mut command: Command, stdin: &[u8]) -> std::process::Output {
         .stderr(Stdio::piped())
         .spawn()
         .expect("cargo-ac should spawn");
-    child
+    let write_result = child
         .stdin
         .take()
         .expect("stdin should be piped")
-        .write_all(stdin)
-        .expect("stdin should be written");
+        .write_all(stdin);
+
+    if let Err(error) = write_result {
+        assert_eq!(
+            error.kind(),
+            io::ErrorKind::BrokenPipe,
+            "stdin should be written unless the command exits before reading it"
+        );
+    }
+
     child.wait_with_output().expect("cargo-ac should finish")
 }
 
