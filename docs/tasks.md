@@ -407,7 +407,7 @@ test(runner): add WA case test
 | ------------------------------------------------- | -------------- |
 | `v0.1.0-alpha.1: repository and CLI skeleton` | リポジトリ整備とCLI骨格 |
 | `v0.1.0-alpha.2: local workspace and test runner` | ローカル生成・ローカルテスト |
-| `v0.1.0-alpha.3: sample downloader` | サンプル取得 |
+| `v0.1.0-alpha.3: problem download` | サンプル取得 |
 | `v0.1.0-alpha.4: login and submit` | ログイン・提出 |
 | `v0.1.0: initial usable release` | 初回利用可能版 |
 
